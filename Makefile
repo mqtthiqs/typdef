@@ -1,7 +1,9 @@
 
-.PHONY: all clean
+.PHONY: all test clean
 
-all: typdef.cmo test.cmi test.cmo
+all: typdef.cmo test
+
+test: test.cmi test.cmo
 
 clean:
 	rm -rf *.cm*

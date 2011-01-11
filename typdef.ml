@@ -24,7 +24,8 @@ let my_parse_implem str =
     let (ml,b2) = !Pcaml.parse_implem (Stream.of_channel (open_in nml)) in
     List.map
       (function
-  	 | StTyp(l,tds) -> a
+  	 | StTyp(l,tds), loc as a -> a
+	 | a -> a
       ) ml, b1 && b2
 
   with Sys_error _ -> old_parse_implem str
