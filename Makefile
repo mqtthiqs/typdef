@@ -8,7 +8,7 @@ test: test.cmi test.cmo
 clean:
 	rm -rf *.cm*
 
-test.cmo: test.ml typdef.cmo
+test.cmo: test.ml test.mli typdef.cmo
 	ocamlc -pp "camlp5o -I . typdef.cmo" -c $<
 
 %.cmo : %.ml
