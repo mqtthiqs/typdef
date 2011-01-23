@@ -1,6 +1,4 @@
-type t = X
+include types(mli with type t = int and type w = bool)
 
-type w = Y
-
-let x = A X
-let y = B Y
+let x = A 42
+let y = B true
