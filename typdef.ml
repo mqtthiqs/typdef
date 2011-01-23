@@ -45,7 +45,7 @@ and types path sigma : module_type -> module_expr = function
 	) items [] in
       MeStr(loc, l)
   | MtWit(_, mt, wcs) -> types path (wcs @ sigma) mt
-  | _ -> assert false
+  | _ -> raise (Invalid_argument "types")
 
 EXTEND
 module_type:
@@ -58,6 +58,8 @@ module_type:
    ]];
 
 module_expr:
-  [[ LIDENT "types"; "("; e = module_type; ")" -> types [] [] e ]];
+  [[ LIDENT "types"; "("; e = module_type; ")" -> 
+       types [] [] e
+  ]];
 END
 
