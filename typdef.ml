@@ -57,9 +57,11 @@ EXTEND
 module_type:
   [[ LIDENT "mli" -> 
        try
-	 let nmli = (Filename.chop_extension (!Pcaml.input_file))^".mli" in
-	 let (mli,_) = !Pcaml.parse_interf (Stream.of_channel (open_in (nmli))) in
-	 MtSig(Ploc.dummy, List.map fst mli)
+	 let nmli = (Filename.chop_extension
+		       (!Pcaml.input_file))^".mli" in
+	 if nmli = !Pcaml.input_file then <:module_type<sig end>> else
+	   let (mli,_) = !Pcaml.parse_interf (Stream.of_channel (open_in (nmli))) in
+	   MtSig(Ploc.dummy, List.map fst mli)
        with Sys_error _ -> <:module_type<sig end>>
    ]];
 
