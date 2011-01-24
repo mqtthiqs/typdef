@@ -4,10 +4,15 @@
 open MLast
 open Pcaml
 
+let rec list_last = function
+  | [] -> raise (Invalid_argument "list_last")
+  | [x] -> x
+  | x :: xs -> list_last xs
+
 let rec with_constr_td_assoc path : with_constr list -> type_decl = function
   | [] -> raise Not_found
   | WcTyp(loc, p, tv, b, t) :: wcs -> 
-      if path=p then {tdNam=loc, List.hd p; tdPrm=tv; tdPrv=b; tdDef=t; tdCon=[]}
+      if path=p then {tdNam=loc, list_last p; tdPrm=tv; tdPrv=b; tdDef=t; tdCon=[]}
       else with_constr_td_assoc path wcs
   | WcMod(loc, p, me) :: wcs -> with_constr_td_assoc path wcs
 
@@ -21,7 +26,7 @@ let rec with_constr_mod_assoc path : with_constr list -> module_expr = function
 let subst_tds path sigma : type_decl list -> type_decl list =
   List.map
     (fun td ->
-       try with_constr_td_assoc (snd td.tdNam :: path) sigma
+       try with_constr_td_assoc (List.rev (snd td.tdNam :: path)) sigma
        with Not_found -> td
     )
 
@@ -30,7 +35,7 @@ let rec subst_mts path sigma
   List.map
     (fun (x,mt) -> 
        try x, with_constr_mod_assoc (x::path) sigma
-       with Not_found -> x, types path sigma mt
+       with Not_found -> x, types (x::path) sigma mt
     )
 
 and types path sigma : module_type -> module_expr = function
@@ -38,8 +43,9 @@ and types path sigma : module_type -> module_expr = function
       let l = List.fold_right
 	(fun si acc ->
 	   match si with
-	     | SgTyp(loc, tds) -> StTyp(loc, subst_tds path sigma tds) :: acc
-	     | SgMod(loc, b, mts) -> 
+	     | SgTyp(loc, tds) -> 
+		 StTyp(loc, subst_tds path sigma tds) :: acc
+	     | SgMod(loc, b, mts) ->
 		 StMod(loc, b, subst_mts path sigma mts) :: acc
 	     | _ -> acc
 	) items [] in
@@ -58,7 +64,7 @@ module_type:
    ]];
 
 module_expr:
-  [[ LIDENT "types"; "("; e = module_type; ")" -> 
+  [[ LIDENT "types"; "of"; e = module_type -> 
        types [] [] e
   ]];
 END
