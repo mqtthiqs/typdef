@@ -1,5 +1,6 @@
 #load "pa_extend.cmo";;
 #load "q_MLast.cmo";;
+#load "pa_macro.cmo";;
 
 open MLast
 open Pcaml
@@ -30,12 +31,14 @@ let subst_tds path sigma : type_decl list -> type_decl list =
        with Not_found -> td
     )
 
-let rec subst_mts path sigma 
+let rec subst_mts path sigma r
     : (string * module_type) list -> (string * module_expr) list =
   List.map
     (fun (x,mt) -> 
-       try x, with_constr_mod_assoc (x::path) sigma
-       with Not_found -> x, types (x::path) sigma mt
+       let me = 
+	 try with_constr_mod_assoc (x::path) sigma 
+	 with Not_found -> types (x::path) sigma mt in
+       x, if r then MeTyc(Ploc.dummy, me, mt) else me
     )
 
 and types path sigma : module_type -> module_expr = function
@@ -45,8 +48,9 @@ and types path sigma : module_type -> module_expr = function
 	   match si with
 	     | SgTyp(loc, tds) -> 
 		 StTyp(loc, subst_tds path sigma tds) :: acc
-	     | SgMod(loc, b, mts) ->
-		 StMod(loc, b, subst_mts path sigma mts) :: acc
+	     | SgMod(loc, r, mts) ->
+		 StMod(loc, r, subst_mts path sigma r mts) :: acc
+	     | SgExc(loc, n, ts) -> StExc(loc, n, ts, []) :: acc
 	     | _ -> acc
 	) items [] in
       MeStr(loc, l)
