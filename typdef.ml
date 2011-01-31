@@ -49,7 +49,8 @@ and types path sigma : module_type -> module_expr = function
 	     | SgTyp(loc, tds) -> 
 		 StTyp(loc, subst_tds path sigma tds) :: acc
 	     | SgMod(loc, r, mts) ->
-		 StMod(loc, r, subst_mts path sigma r mts) :: acc
+		 (try StMod(loc, r, subst_mts path sigma r mts) :: acc
+		  with Invalid_argument _ -> acc)
 	     | SgExc(loc, n, ts) -> StExc(loc, n, ts, []) :: acc
 	     | _ -> acc
 	) items [] in
