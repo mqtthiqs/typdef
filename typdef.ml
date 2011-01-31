@@ -51,13 +51,18 @@ and types path sigma : module_type -> module_expr = function
 	     | SgMod(loc, r, mts) ->
 		 (try StMod(loc, r, subst_mts path sigma r mts) :: acc
 		  with Invalid_argument _ -> acc)
+	     | SgMty(loc, n, mt) -> StMty(loc, n, mt) :: acc
 	     | SgExc(loc, n, ts) -> StExc(loc, n, ts, []) :: acc
 	     | _ -> acc
 	) items [] in
       MeStr(loc, l)
   | MtWit(_, mt, wcs) -> types path (wcs @ sigma) mt
   | MtFun (loc,argn, argt, mt) -> MeFun(loc, argn, argt, types path sigma mt)
-  | _ -> raise (Invalid_argument "types")
+  | MtAcc _
+  | MtApp _
+  | MtLid _
+  | MtQuo _
+  | MtUid _ -> raise (Invalid_argument "types")
 
 EXTEND
 module_type:
