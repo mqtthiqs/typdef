@@ -55,6 +55,7 @@ and types path sigma : module_type -> module_expr = function
 	) items [] in
       MeStr(loc, l)
   | MtWit(_, mt, wcs) -> types path (wcs @ sigma) mt
+  | MtFun (loc,argn, argt, mt) -> MeFun(loc, argn, argt, types path sigma mt)
   | _ -> raise (Invalid_argument "types")
 
 EXTEND
